@@ -35,7 +35,6 @@ fn vec3_tester(){
     let v2 = Vec3::new(1.00, 1.00, 1.00);
     let v3: Vec3 = v1+v2;
     println!("{:?}", v3.e);
-
     let v5 = Vec3::new(1.00, 2.00, 3.00);
     let v4: Vec3 = v5*2.00;
     println!("Scaler = {:?}", v4.e);
@@ -43,7 +42,10 @@ fn vec3_tester(){
     let v6 = v4.unit_vector();
     println!("Unit Vector of the Scaler: {:?}",v6.e);
 
-    println!("the x component of the scaler is {}, y is {}, z is {}", v6.x(), v6.y(), v6.z())
+    println!("the x component of the scaler is {}, y is {}, z is {}", v6.x(), v6.y(), v6.z());
 
+
+    println!("Dot Product: {}",v1.dot(v2));
+    println!("Cross product between scaler and v1 {:?}", v1.cross(v4));
 
 }
