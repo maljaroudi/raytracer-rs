@@ -1,5 +1,6 @@
 use std::{ops};
 use std::f32;
+pub mod color;
 
 #[derive(Debug,Clone, Copy)]
 pub struct Vec3 {
@@ -125,3 +126,5 @@ impl ops::Mul for Vec3 {
 
     }
 }
+pub use Vec3 as Color;
+

@@ -1,26 +1,27 @@
 mod vec3;
-use vec3::Vec3;
+use vec3::*;
+use vec3::color::*;
+
 
 fn main() {
-    /*     let image_width = 256;
-        let image_height = 256;
+    let image_width = 256;
+    let image_height = 256;
 
         println!("P3\n{} {}\n255", image_width, image_height);
         for j in (0..image_height).rev(){
             for i in 0..image_width{
-                let r: f32 = i as f32 / (image_width-1) as f32;
-                let g = j as  f32 / (image_height-1) as f32;
-                let b: f32 = 0.25;
 
-                let ir : i32 = (255.999 * r) as i32;
-                let ig : i32 = (255.999 * g) as i32;
-                let ib : i32 = (255.999 * b) as i32;
+                let pixel_color: Color = Color::new(i as f32 / (image_width-1) as f32,
+                                                    j as f32 / (image_height-1) as f32,
+                                                     0.25);
 
-                println!("{} {} {}", ir,ig,ib);
+                write_color(pixel_color);
 
 
             }
-        } */
+        }
+
+
     vec3_tester();
 
 
@@ -48,4 +49,6 @@ fn vec3_tester(){
     println!("Dot Product: {}",v1.dot(v2));
     println!("Cross product between scaler and v1 {:?}", v1.cross(v4));
 
+
+    println!("Normal multiplication {:?}", v1*v1);
 }
