@@ -2,7 +2,10 @@ mod vec3;
 use vec3::*;
 use vec3::color::*;
 use vec3::ray::*;
-
+use vec3::hittable::*;
+use crate::vec3::hittable_list::HittableList;
+use std::rc::Rc;
+use crate::vec3::sphere::*;
 
 fn main() {
 
@@ -23,6 +26,17 @@ fn main() {
     let lower_left_corner = origin - horizontal/2.00 - vertical/2.00 -
         Vec3{e: [0.00, 0.00, focal_length]};
 
+    // ZA WARDOO
+    let mut world = HittableList::new();
+    world.add(Rc::new(Sphere{
+        center: Point3::new(0.00,0.00,-1.00),
+        radius: 0.5
+    }));
+
+    world.add(Rc::new(Sphere{
+        center: Point3::new(0.00,-100.5, -1.00),
+        radius: 100.00
+    }));
 
 
 
@@ -39,7 +53,7 @@ fn main() {
                     origin: origin,
                     direction: lower_left_corner + horizontal*u + vertical*v - origin,
                 };
-                let pixel_color: Color = ray_color(r);
+                let pixel_color: Color = ray_color(r,&world);
                 write_color(pixel_color);
 
             }
@@ -90,31 +104,32 @@ fn vec3_tester(){
 
 fn hit_sphere(center: Point3, radius: f32, r: Ray) -> f32 {
     let oc: Vec3 = r.origin - center;
-    let a = r.direction.dot(r.direction);
-    let b = 2.0 * oc.dot(r.direction);
-    let c = oc.dot(oc) - radius*radius;
-    let discriminant = b*b - 4.00*a*c;
+    let a = r.direction.length_squared();
+    let half_b = oc.dot(r.direction);
+    let c = oc.length_squared() - radius*radius;
+    let discriminant = half_b*half_b - a*c;
     if discriminant < 0.00 {
         -1.0
     }
     else{
-        (-b - discriminant.sqrt()) / (2.0*a)
+        (-half_b - discriminant.sqrt()) / a
     }
 }
 
 
-fn ray_color(r: Ray) -> Color {
-    let t = hit_sphere(Point3{e: [0.00,0.00,-1.0]}, 0.5, r);
-    if t > 0.0 {
-        let n = (r.at(t) - Vec3{e:[0.00,0.00,-1.00]}).unit_vector();
-        Color{e:[n.x()+1.00, n.y()+1.00, n.z()+1.00]} * 0.5
+fn ray_color(r: Ray, world: &dyn Hittable) -> Color {
+    let mut rec = HitRecord{
+        p: Vec3::new(0.00,0.00,0.00),
+        normal: Vec3::new(0.00,0.00,0.00),
+        t: 0.0,
+        front_face: false
+    };
+    if world.hit(r, 0.00, std::f32::INFINITY, &mut rec){
+        return rec.normal+Color::new(1.00,1.00, 1.00) * 0.5;
     }
-    else{
-
-        let unit_direction = r.direction.unit_vector();
-        let t = (unit_direction.y() + 1.0) * 0.5;
-        Color{e: [1.0, 1.0, 1.0]} * (1.0-t) + Color{e: [0.5, 0.7, 1.0]}*t
-    }
+    let unit_direction = r.direction.unit_vector();
+    let t = (unit_direction.y() +1.0)*0.5;
+    Color::new(1.0,1.0,1.0)*(1.0-t) + Color::new(0.5,0.7,1.0)*t
 
 
 
