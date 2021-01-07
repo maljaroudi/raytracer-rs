@@ -87,10 +87,34 @@ fn vec3_tester(){
 }
 
 
+fn hit_sphere(center: Point3, radius: f32, r: Ray) -> bool {
+    let oc: Vec3 = r.origin - center;
+    let a = r.direction.dot(r.direction);
+    let b = 2.0 * oc.dot(r.direction);
+    let c = oc.dot(oc) - radius*radius;
+    let discriminant = b*b - 4.00*a*c;
+    if discriminant > 0.00 {
+        true
+    }
+    else{
+        false
+    }
+}
+
 
 fn ray_color(r: Ray) -> Color {
-    let unit_direction = r.direction.unit_vector();
-    let t = (unit_direction.y() + 1.0) * 0.5;
-    return Color{e: [1.0, 1.0, 1.0]} * (1.0-t) + Color{e: [0.5, 0.7, 1.0]}*t ;
+    if hit_sphere(Point3{e: [0.00,0.00, -1.00]}, 0.5, r) {
+        Color{e: [1.00,0.00, 0.00]}
+    }
+    else{
+        let unit_direction = r.direction.unit_vector();
+        let t = (unit_direction.y() + 1.0) * 0.5;
+        return Color{e: [1.0, 1.0, 1.0]} * (1.0-t) + Color{e: [0.5, 0.7, 1.0]}*t ;
+    }
+
+
 
 }
+
+
+
