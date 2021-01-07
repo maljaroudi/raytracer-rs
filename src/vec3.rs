@@ -1,6 +1,8 @@
 use std::{ops};
 use std::f32;
 pub mod color;
+pub mod ray;
+
 
 #[derive(Debug,Clone, Copy)]
 pub struct Vec3 {
@@ -115,6 +117,7 @@ impl ops::Sub for Vec3 {
 
 }
 
+//Multiplies every component with its correspondent
 impl ops::Mul for Vec3 {
     type Output = Self;
 
@@ -127,4 +130,5 @@ impl ops::Mul for Vec3 {
     }
 }
 pub use Vec3 as Color;
+pub use Vec3 as Point3;
 
