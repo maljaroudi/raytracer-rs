@@ -3,6 +3,7 @@ use vec3::*;
 use vec3::color::*;
 use vec3::ray::*;
 
+
 fn main() {
 
 
@@ -87,29 +88,32 @@ fn vec3_tester(){
 }
 
 
-fn hit_sphere(center: Point3, radius: f32, r: Ray) -> bool {
+fn hit_sphere(center: Point3, radius: f32, r: Ray) -> f32 {
     let oc: Vec3 = r.origin - center;
     let a = r.direction.dot(r.direction);
     let b = 2.0 * oc.dot(r.direction);
     let c = oc.dot(oc) - radius*radius;
     let discriminant = b*b - 4.00*a*c;
-    if discriminant > 0.00 {
-        true
+    if discriminant < 0.00 {
+        -1.0
     }
     else{
-        false
+        (-b - discriminant.sqrt()) / (2.0*a)
     }
 }
 
 
 fn ray_color(r: Ray) -> Color {
-    if hit_sphere(Point3{e: [0.00,0.00, -1.00]}, 0.5, r) {
-        Color{e: [1.00,0.00, 0.00]}
+    let t = hit_sphere(Point3{e: [0.00,0.00,-1.0]}, 0.5, r);
+    if t > 0.0 {
+        let n = (r.at(t) - Vec3{e:[0.00,0.00,-1.00]}).unit_vector();
+        Color{e:[n.x()+1.00, n.y()+1.00, n.z()+1.00]} * 0.5
     }
     else{
+
         let unit_direction = r.direction.unit_vector();
         let t = (unit_direction.y() + 1.0) * 0.5;
-        return Color{e: [1.0, 1.0, 1.0]} * (1.0-t) + Color{e: [0.5, 0.7, 1.0]}*t ;
+        Color{e: [1.0, 1.0, 1.0]} * (1.0-t) + Color{e: [0.5, 0.7, 1.0]}*t
     }
 
 
