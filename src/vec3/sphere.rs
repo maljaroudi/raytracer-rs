@@ -1,11 +1,12 @@
 use crate::vec3::{hittable::*, Vec3, Point3, ray::*, material};
 use std::rc::Rc;
+use crate::vec3::material::*;
 
 
 pub struct Sphere{
     pub center: Point3,
     pub radius: f32,
-    pub mat_ptr: Rc<material>,
+    pub mat_ptr: Rc<dyn Material>,
 }
 
 impl Hittable for Sphere{

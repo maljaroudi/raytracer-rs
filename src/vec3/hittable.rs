@@ -5,7 +5,7 @@ use crate::vec3::rtweekend::*;
 use crate::vec3::material::*;
 
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,

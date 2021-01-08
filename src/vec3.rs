@@ -7,7 +7,7 @@ pub mod sphere;
 pub mod hittable_list;
 pub mod rtweekend;
 pub mod camera;
-mod material;
+pub mod material;
 
 
 #[derive(Debug,Clone, Copy)]
@@ -84,6 +84,14 @@ impl Vec3{
         return Self::random_in_unit_sphere().unit_vector();
     }
 
+    pub fn near_zero(self) -> bool {
+        let s:f32 = 1e-8;
+        return (self.e[0].abs() < s) && (self.e[1].abs() < s) && (self.e[2].abs() < s);
+    }
+
+    pub fn reflect(v: Vec3, n: Vec3) -> Self {
+        return v - n * v.dot(n)*2.00;
+    }
 }
 
 impl ops::Add for Vec3{
