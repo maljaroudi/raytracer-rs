@@ -1,15 +1,29 @@
 //This class is useless (Kinda) All of the implementations are in std rust.
 // Check for deletion.
 
-use std::rc::Rc;
 use std::f32;
+use rand::Rng;
+pub const INFINITY: f32 = f32::INFINITY;
 
-const INFINITY: f32 = f32::INFINITY;
-
-const PI: f32 = f32::consts::PI;
+pub const PI: f32 = f32::consts::PI;
 
 
-fn degrees_to_radians(degrees: f32) {
+pub fn degrees_to_radians(degrees: f32) {
     degrees.to_radians();
+}
+
+pub fn random_f32() -> f32 {
+     rand::thread_rng().gen_range(0.00 .. 1.00)
+}
+
+
+pub fn clamp(x: f32, min: f32, max: f32) -> f32{
+    if x < min {
+        return min;
+    }
+    if x > max {
+        return max;
+    }
+    return x;
 }
 

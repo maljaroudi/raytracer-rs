@@ -6,6 +6,7 @@ pub mod hittable;
 pub mod sphere;
 pub mod hittable_list;
 pub mod rtweekend;
+pub mod camera;
 
 
 #[derive(Debug,Clone, Copy)]
@@ -72,6 +73,16 @@ impl ops::Add for Vec3{
     }
 
 
+}
+
+impl ops::AddAssign for Vec3{
+
+    fn add_assign(&mut self, rhs: Self){
+        *self = Vec3 {
+            e: [self.e[0] + rhs.e[0], self.e[1] + rhs.e[1], self.e[2] + rhs.e[2]]
+        }
+
+    }
 }
 
 impl ops::Neg for Vec3{

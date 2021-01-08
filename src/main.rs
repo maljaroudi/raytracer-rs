@@ -5,26 +5,17 @@ use vec3::ray::*;
 use vec3::hittable::*;
 use crate::vec3::hittable_list::HittableList;
 use std::rc::Rc;
-use crate::vec3::sphere::*;
-
+use vec3::sphere::*;
+use vec3::camera::*;
+use vec3::rtweekend::*;
 fn main() {
 
 
     let aspect_ratio:f32 = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f32 / aspect_ratio) as i32;
+    let samples_per_pixel = 100;
 
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-
-    let focal_length: f32 = 1.0;
-
-    let origin = Point3{e: [0.00,0.00,0.00]};
-    let horizontal = Vec3 {e: [viewport_width,0.00,0.00]};
-    let vertical = Vec3 {e: [0.00,viewport_height,0.00]};
-
-    let lower_left_corner = origin - horizontal/2.00 - vertical/2.00 -
-        Vec3{e: [0.00, 0.00, focal_length]};
 
     // ZA WARDOO
     let mut world = HittableList::new();
@@ -39,26 +30,25 @@ fn main() {
     }));
 
 
+    let cam = Camera::new();
 
 
 
 
 
         println!("P3\n{} {}\n255", image_width, image_height);
-        for j in (0..image_height).rev(){
-            for i in 0..image_width{
-                let u = i as f32 / (image_width-1) as f32;
-                let v = j as f32 / (image_height-1) as f32;
-                let r = Ray{
-                    origin: origin,
-                    direction: lower_left_corner + horizontal*u + vertical*v - origin,
-                };
-                let pixel_color: Color = ray_color(r,&world);
-                write_color(pixel_color);
-
+        for j in (0..image_height).rev() {
+            for i in 0..image_width {
+                let mut pixel_color: Color = Color::new(0.00, 0.00, 0.00);
+                for s in 0..samples_per_pixel {
+                    let u = (i as f32 + random_f32()) / (image_width - 1) as f32;
+                    let v = (j as f32 + random_f32()) / (image_height - 1) as f32;
+                    let r: Ray = cam.get_ray(u, v);
+                    pixel_color += ray_color(r, &world);
+                }
+                write_color(pixel_color, samples_per_pixel);
             }
         }
-
 
     //vec3_tester();
 
@@ -70,7 +60,8 @@ fn main() {
 
 
 fn vec3_tester(){
-    let  v1 = Vec3::new(1.00, 2.00, 3.00);
+
+    let v1 = Vec3::new(1.00, 2.00, 3.00);
     let v2 = Vec3::new(1.00, 1.00, 1.00);
     let v3: Vec3 = v1+v2;
     println!("{:?}", v3.e);
