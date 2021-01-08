@@ -9,6 +9,7 @@ use vec3::sphere::*;
 use vec3::camera::*;
 use vec3::rtweekend::*;
 use vec3::material::*;
+
 fn main() {
 
 
@@ -31,10 +32,10 @@ fn main() {
     });
 
     let material_left = Rc::new(Metal{
-        albedo: Color{ e: [0.8, 0.8, 0.8] }
+        albedo: Color{ e: [0.8, 0.8, 0.8] }, fuzz: 0.3
     });
     let material_right = Rc::new(Metal{
-        albedo: Color{ e: [0.8, 0.6, 0.2] }
+        albedo: Color{ e: [0.8, 0.6, 0.2] }, fuzz: 1.0
     });
 
     world.add(Rc::new(Sphere{

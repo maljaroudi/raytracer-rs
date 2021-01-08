@@ -26,12 +26,22 @@ impl Material for Lambertian{
 
 pub struct Metal {
     pub albedo: Color,
+    pub fuzz: f32,
 }
+impl Metal{
+    fn new(albedo: Color, fuzz: f32) -> Self {
+        Metal {
+            albedo,
+            fuzz:fuzz.min(1.0),
+        }
 
+    }
+
+}
 impl Material for Metal{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray)-> bool{
         let mut reflected = Vec3::reflect(r_in.direction.unit_vector(), rec.normal);
-        *scattered = Ray{ origin: rec.p, direction: reflected};
+        *scattered = Ray{ origin: rec.p, direction: reflected+ Vec3::random_in_unit_sphere()* self.fuzz};
 
         *attenuation = self.albedo;
 
