@@ -12,8 +12,8 @@ pub fn degrees_to_radians(degrees: f32) {
     degrees.to_radians();
 }
 
-pub fn random_f32() -> f32 {
-     rand::thread_rng().gen_range(0.00 .. 1.00)
+pub fn random_f32(min: f32, max: f32) -> f32 {
+     rand::thread_rng().gen_range(min.. max)
 }
 
 

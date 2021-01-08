@@ -7,6 +7,7 @@ pub mod sphere;
 pub mod hittable_list;
 pub mod rtweekend;
 pub mod camera;
+mod material;
 
 
 #[derive(Debug,Clone, Copy)]
@@ -60,6 +61,27 @@ impl Vec3{
 
     pub fn unit_vector(self) -> Self {
         self / self.length()
+    }
+
+    pub fn random(min: f32, max: f32) -> Self {
+        Vec3{
+            e: [random_f32(min, max), random_f32(min, max), random_f32(min, max)]
+        }
+    }
+
+    // if something goes wrong, it's probably here
+    pub fn random_in_unit_sphere() -> Self {
+        loop{
+            let p = Vec3::random(-1.0, 1.0);
+            if p.length_squared() >= 1.00{
+                continue
+            }
+            return p;
+        }
+    }
+
+    pub fn random_unit_vector() -> Self {
+        return Self::random_in_unit_sphere().unit_vector();
     }
 
 }
@@ -146,4 +168,5 @@ impl ops::Mul for Vec3 {
 }
 pub use Vec3 as Color;
 pub use Vec3 as Point3;
+use crate::vec3::rtweekend::random_f32;
 

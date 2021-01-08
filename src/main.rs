@@ -15,7 +15,7 @@ fn main() {
     let image_width = 400;
     let image_height = (image_width as f32 / aspect_ratio) as i32;
     let samples_per_pixel = 100;
-
+    let max_depth = 50;
 
     // ZA WARDOO
     let mut world = HittableList::new();
@@ -41,10 +41,10 @@ fn main() {
             for i in 0..image_width {
                 let mut pixel_color: Color = Color::new(0.00, 0.00, 0.00);
                 for s in 0..samples_per_pixel {
-                    let u = (i as f32 + random_f32()) / (image_width - 1) as f32;
-                    let v = (j as f32 + random_f32()) / (image_height - 1) as f32;
+                    let u = (i as f32 + random_f32(0.00, 1.00)) / (image_width - 1) as f32;
+                    let v = (j as f32 + random_f32(0.00, 1.00)) / (image_height - 1) as f32;
                     let r: Ray = cam.get_ray(u, v);
-                    pixel_color += ray_color(r, &world);
+                    pixel_color += ray_color(r, &world, max_depth);
                 }
                 write_color(pixel_color, samples_per_pixel);
             }
@@ -108,15 +108,22 @@ fn hit_sphere(center: Point3, radius: f32, r: Ray) -> f32 {
 }
 
 
-fn ray_color(r: Ray, world: &dyn Hittable) -> Color {
+fn ray_color(r: Ray, world: &dyn Hittable, depth: i32) -> Color {
     let mut rec = HitRecord{
         p: Vec3::new(0.00,0.00,0.00),
         normal: Vec3::new(0.00,0.00,0.00),
         t: 0.0,
         front_face: false
     };
-    if world.hit(r, 0.00, std::f32::INFINITY, &mut rec){
-        return rec.normal+Color::new(1.00,1.00, 1.00) * 0.5;
+
+    if depth <=0 {
+        return Color::new(0.00,0.00,0.00);
+    }
+
+    if world.hit(r, 0.001, std::f32::INFINITY, &mut rec){
+        let target: Point3 = rec.p + rec.normal + Vec3::random_unit_vector();
+        return ray_color(Ray{ origin: rec.p, direction: target - rec.p }, world, depth-1)
+            * 0.5;
     }
     let unit_direction = r.direction.unit_vector();
     let t = (unit_direction.y() +1.0)*0.5;

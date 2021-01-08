@@ -1,9 +1,11 @@
-use crate::vec3::{hittable::*, Vec3, Point3, ray::*};
+use crate::vec3::{hittable::*, Vec3, Point3, ray::*, material};
+use std::rc::Rc;
 
 
 pub struct Sphere{
     pub center: Point3,
-    pub radius: f32
+    pub radius: f32,
+    pub mat_ptr: Rc<material>,
 }
 
 impl Hittable for Sphere{
@@ -33,6 +35,7 @@ impl Hittable for Sphere{
             rec.p = r.at(rec.t);
             let outward_normal = (rec.p - self.center) / self.radius;
             rec.set_face_normal(r, outward_normal);
+            rec.mat_ptr = Some(self.mat_ptr.clone());
             return true
         }
 
