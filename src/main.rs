@@ -28,14 +28,16 @@ fn main() {
     });
 
     let material_center = Rc::new(Lambertian{
-        albedo: Color{ e: [0.7, 0.3, 0.3] }
+        albedo: Color{ e: [0.1,0.2,0.5] }
     });
 
-    let material_left = Rc::new(Metal{
-        albedo: Color{ e: [0.8, 0.8, 0.8] }, fuzz: 0.3
+
+    let material_left = Rc::new(Dielectric{
+        index_of_refraction: 1.5,
     });
+
     let material_right = Rc::new(Metal{
-        albedo: Color{ e: [0.8, 0.6, 0.2] }, fuzz: 1.0
+        albedo: Color{ e: [0.8, 0.6, 0.2] }, fuzz: 0.0
     });
 
     world.add(Rc::new(Sphere{
@@ -57,9 +59,17 @@ fn main() {
     world.add(Rc::new(Sphere{
         center: Point3::new(-1.0,    0.0, -1.0),
         radius: 0.5,
-        mat_ptr: material_left}
+        mat_ptr: material_left.clone()}
     )
     );
+
+    world.add(Rc::new(Sphere{
+        center: Point3::new(-1.0,    0.0, -1.0),
+        radius: -0.4,
+        mat_ptr: material_left.clone()}
+    )
+    );
+
 
     world.add(Rc::new(Sphere{
         center: Point3::new( 1.0,    0.0, -1.0),

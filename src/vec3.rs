@@ -92,6 +92,18 @@ impl Vec3{
     pub fn reflect(v: Vec3, n: Vec3) -> Self {
         return v - n * v.dot(n)*2.00;
     }
+
+    pub fn refract(uv: Self, n: Self, etai_over_etat: f32) -> Self {
+        let cos_theta = (-uv).dot(n).min(1.0);
+        let r_out_perp: Self =   (uv + n*cos_theta) * etai_over_etat;
+        let r_out_parallel: Self =n *  -(1.0 - r_out_perp.length_squared()).abs().sqrt();
+        return r_out_perp + r_out_parallel;
+    }
+    pub fn zeros() -> Self{
+        Self{
+            e: [0.00,0.00,0.00]
+        }
+    }
 }
 
 impl ops::Add for Vec3{
@@ -177,4 +189,5 @@ impl ops::Mul for Vec3 {
 pub use Vec3 as Color;
 pub use Vec3 as Point3;
 use crate::vec3::rtweekend::random_f32;
+use std::ops::Neg;
 
