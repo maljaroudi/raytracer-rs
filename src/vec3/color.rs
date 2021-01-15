@@ -30,10 +30,7 @@ pub fn write_color(img: Vec<Vec<Vec3>>, file: &str) -> Result<(), Error>{
 
     DynamicImage::ImageRgb8((fet)).save(file);
 
-     // for (y, row) in img.iter().enumerate() {
-     //     for (x, pixel) in row.iter().enumerate() {
-     //         imgbuf.put_pixel(x as u32, y as u32, image::Rgb([pixel.x() as u8, pixel.y() as u8, pixel.z() as u8]));
-     //     }};
+
 
     Ok(())
 
