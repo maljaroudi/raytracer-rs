@@ -2,7 +2,10 @@
 // Check for deletion.
 
 use std::f32;
-use rand::Rng;
+use rand::{Rng, SeedableRng, thread_rng};
+use rand::rngs::SmallRng;
+
+
 pub const INFINITY: f32 = f32::INFINITY;
 
 pub const PI: f32 = f32::consts::PI;
@@ -13,7 +16,11 @@ pub fn degrees_to_radians(degrees: f32) -> f32 {
 }
 
 pub fn random_f32(min: f32, max: f32) -> f32 {
-     rand::thread_rng().gen_range(min.. max)
+    let mut thread_rng = thread_rng();
+
+    let mut small_rng = SmallRng::from_rng(&mut thread_rng).unwrap();
+    let random:f32 = small_rng.gen_range(min..max);
+     return random;
 }
 
 

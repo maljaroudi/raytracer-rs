@@ -1,16 +1,19 @@
-use crate::vec3::{hittable::*, Vec3, Point3, ray::*, material};
+use crate::vec3::{hittable::*, Vec3, Point3, ray::*};
 use std::rc::Rc;
-use crate::vec3::material::*;
-
+use crate::vec3::material::Material;
+use std::marker::Sync;
+use std::sync::Arc;
+use std::borrow::Borrow;
 
 pub struct Sphere{
     pub center: Point3,
     pub radius: f32,
-    pub mat_ptr: Rc<dyn Material>,
+    pub mat_ptr: Material,
 }
 
-impl Hittable for Sphere{
-    fn hit(&self, r: Ray, t_min: f32, t_max: f32, mut rec: &mut HitRecord) ->bool {
+impl Sphere
+{
+    pub(crate) fn hit(&self, r: Ray, t_min: f32, t_max: f32, mut rec: &mut HitRecord) -> bool  {
         let oc: Vec3 = r.origin - self.center;
         let a = r.direction.length_squared();
         let half_b = oc.dot(r.direction);
@@ -18,7 +21,7 @@ impl Hittable for Sphere{
 
         let discriminant = half_b*half_b - a*c;
         if discriminant < 0.00 {
-            return false;
+            return false ;
         }
         let sqrtd = discriminant.sqrt();
 
@@ -36,8 +39,8 @@ impl Hittable for Sphere{
             rec.p = r.at(rec.t);
             let outward_normal = (rec.p - self.center) / self.radius;
             rec.set_face_normal(r, outward_normal);
-            rec.mat_ptr = Some(self.mat_ptr.clone());
-            return true
+            rec.mat_ptr = Option::from(self.mat_ptr.clone());
+            return true;
         }
 
     }

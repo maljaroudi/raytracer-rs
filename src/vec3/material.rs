@@ -1,20 +1,26 @@
 use crate::vec3::*;
-use std::rc::Rc;
 use crate::vec3::ray::*;
 use crate::vec3::hittable::HitRecord;
-use std::any::Any;
 use crate::vec3::rtweekend::random_f32;
-
+#[derive(Clone)]
+pub enum Material{
+    Lambertian(Lambertian),
+    Metal(Metal),
+    Dielectric(Dielectric)
+}
+#[derive(Clone)]
 pub struct Lambertian {
     pub albedo: Color,
 }
 
-pub trait Material {
+
+
+pub trait Scatter {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool;
 }
 
-impl Material for Lambertian{
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool{
+impl Scatter for Lambertian{
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool{
         let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
         if scatter_direction.near_zero() {
             scatter_direction = rec.normal;
@@ -25,7 +31,7 @@ impl Material for Lambertian{
         return true;
     }
 }
-
+#[derive(Clone)]
 pub struct Metal {
     pub albedo: Color,
     pub fuzz: f32,
@@ -40,7 +46,7 @@ impl Metal{
     }
 
 }
-impl Material for Metal{
+impl Scatter for Metal{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray)-> bool{
         let mut reflected = Vec3::reflect(r_in.direction.unit_vector(), rec.normal);
         *scattered = Ray{ origin: rec.p, direction: reflected+ Vec3::random_in_unit_sphere()* self.fuzz};
@@ -50,12 +56,12 @@ impl Material for Metal{
         return scattered.direction.dot(rec.normal) > 0.00
     }
 }
-
+#[derive(Clone)]
 pub struct Dielectric {
     pub(crate) index_of_refraction: f32,
 }
 
-impl Material for Dielectric{
+impl Scatter for Dielectric{
     fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray)-> bool{
         *attenuation = Color::new(1.0,1.0,1.0);
 
@@ -86,6 +92,23 @@ impl Material for Dielectric{
 
         *scattered = Ray{ origin: rec.p, direction };
         return true;
+    }
+}
+
+
+impl Scatter for Material{
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
+        match self{
+            Material::Lambertian(ref inner) => {
+                inner.scatter(r_in,rec, attenuation, scattered)
+            }
+            Material::Metal(ref inner) => {
+                inner.scatter(r_in,rec, attenuation, scattered)
+            }
+            Material::Dielectric(ref inner) => {
+                inner.scatter(r_in,rec, attenuation, scattered)
+            }
+        }
     }
 }
 

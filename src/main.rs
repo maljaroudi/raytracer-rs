@@ -9,105 +9,65 @@ use vec3::sphere::*;
 use vec3::camera::*;
 use vec3::rtweekend::*;
 use vec3::material::*;
+use std::fs::File;
+use std::io::{Write, Error, BufWriter};
+use rayon::prelude::*;
+use rayon::iter::FlatMap;
+use std::sync::{Arc,Mutex};
+use std::borrow::BorrowMut;
 
-fn main() {
+
+fn main() -> Result<(), Error> {
 
 
-    let aspect_ratio:f32 = 16.0 / 9.0;
-    let image_width = 400;
+    let aspect_ratio:f32 = 3.0 / 2.0;
+    let image_width:i32 = 1200;
     let image_height = (image_width as f32 / aspect_ratio) as i32;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 500;
     let max_depth = 50;
 
-    // ZA WARDOO
-    let mut world = HittableList::new();
-
-    let radius = (std::f32::consts::PI / 4.00);
+    let world = random_scene();
 
 
+    let lookfrom: Point3 =  Point3::new(13.0, 2.0, 3.0);
+    let lookat: Point3 = Point3::new(0.0,0.0,0.0);
+    let vup = Vec3::new(0.00, 1.00, 0.00);
 
+    let dist_to_focus = 10.0;
+    let aperture:f32 = 0.1;
 
-    let material_left = Rc::new(Dielectric{
-        index_of_refraction: 1.5
-    });
-
-
-    let material_right = Rc::new(Metal{
-        albedo: Vec3::new(0.8,0.6,0.2),
-        fuzz: 0.0
-    });
-    
-    let material_ground = Rc::new(Lambertian{
-        albedo: Vec3 { e: [0.8,0.8,0.0] },
-    });
-    
-    let material_center = Rc::new(Lambertian{
-        albedo: Vec3 { e: [0.1,0.2,0.5] },
-    });
-    
-
-
-    world.add(Rc::new(Sphere{
-        center: Point3::new(-1.0,    0.0, -1.0),
-        radius: 0.5,
-        mat_ptr: material_left.clone()}
-    )
-    );
-
-    world.add(Rc::new(Sphere{
-        center: Point3::new(-1.0,    0.0, -1.0),
-        radius: -0.45,
-        mat_ptr: material_left}
-    )
-    );
-
-
-    world.add(Rc::new(Sphere{
-        center: Point3::new( 1.0,    0.0, -1.0),
-        radius: 0.5,
-        mat_ptr: material_right}
-    )
-    );
-
-    world.add(Rc::new(Sphere{
-        center: Point3::new( 0.00,    -100.5, -1.0),
-        radius: 100.0,
-        mat_ptr: material_ground}
-    )
-    );
-
-    world.add(Rc::new(Sphere{
-        center: Point3::new( 0.00,    0.00, -1.0),
-        radius: 0.5,
-        mat_ptr: material_center}
-    )
-    );
-
-    let cam = Camera::new(aspect_ratio, 20.0,
-                          Point3::new(-2.00, 2.00, 1.00),
-                          Point3::new(0.00, 0.00, -1.00),
-                          Vec3::new(0.00, 1.00, 0.00));
+    let cam = Camera::new(aspect_ratio, 20.0, lookfrom,
+                          lookat, vup, dist_to_focus, aperture);
 
 
 
 
 
-
-        println!("P3\n{} {}\n255", image_width, image_height);
-        for j in (0..image_height).rev() {
-            for i in 0..image_width {
-                let mut pixel_color: Color = Color::new(0.00, 0.00, 0.00);
-                for s in 0..samples_per_pixel {
-                    let u = (i as f32 + random_f32(0.00, 1.00)) / (image_width - 1) as f32;
-                    let v = (j as f32 + random_f32(0.00, 1.00)) / (image_height - 1) as f32;
-                    let r: Ray = cam.get_ray(u, v);
-                    pixel_color += ray_color(r, &world, max_depth);
-                }
-                write_color(pixel_color, samples_per_pixel);
+    let scene: Vec<Vec<Vec3>> = (0..image_height).into_par_iter().map(|y_rev| {
+        let y: f32 = image_height as f32 - y_rev as f32 - 1.0;
+        let row: Vec<Vec3> = (0..image_width).into_par_iter().map(|x| {
+            let mut color_vector: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+            for _s in 0..samples_per_pixel {
+                let u: f32 = (x as f32 + rand::random::<f32>()) / image_width as f32;
+                let v: f32 = (y as f32 + rand::random::<f32>()) / image_height as f32;
+                let r: Ray = cam.get_ray(u, v);
+                color_vector = color_vector + ray_color(r, &world, 10);
             }
-        }
+            color_vector = color_vector/samples_per_pixel as f32;
+            color_vector = Vec3::new(color_vector.x().sqrt(), color_vector.y().sqrt(), color_vector.z().sqrt())*255.99;
+            color_vector
+        }).collect();
+        row
+            //write_color(bytes,samples_per_pixel,image_width,image_height);
+        }).collect();
+        write_color(scene,"test.png")?;
 
-    //vec3_tester();
+
+
+
+
+
+        Ok(())
 
 
 
@@ -116,38 +76,7 @@ fn main() {
 
 
 
-fn vec3_tester(){
 
-    let v1 = Vec3::new(1.00, 2.00, 3.00);
-    let v2 = Vec3::new(1.00, 1.00, 1.00);
-    let v3: Vec3 = v1+v2;
-    println!("{:?}", v3.e);
-    let v5 = Vec3::new(1.00, 2.00, 3.00);
-    let v4: Vec3 = v5*2.00;
-    println!("Scaler = {:?}", v4.e);
-
-    let v6 = v4.unit_vector();
-    println!("Unit Vector of the Scaler: {:?}",v6.e);
-
-    println!("the x component of the scalar is {}, y is {}, z is {}", v6.x(), v6.y(), v6.z());
-
-
-    println!("Dot Product: {}",v1.dot(v2));
-    println!("Cross product between scalar and v1 {:?}", v1.cross(v4));
-
-
-    println!("Normal multiplication {:?}", v1*v1);
-
-
-    println!("Testing Rays ...");
-    let r1 = Ray{
-    origin: Vec3{e: [1.00,2.00,3.00]},
-    direction: Vec3{e: [1.00,2.00,3.00]}
-    };
-
-    println!("{:?}", r1.at(1.00));
-
-}
 
 
 fn hit_sphere(center: Point3, radius: f32, r: Ray) -> f32 {
@@ -165,7 +94,7 @@ fn hit_sphere(center: Point3, radius: f32, r: Ray) -> f32 {
 }
 
 
-fn ray_color(r: Ray, world: &dyn Hittable, depth: i32) -> Color {
+fn ray_color(r: Ray, world: &HittableList, depth: i32) -> Color {
     let mut rec = HitRecord{
         p: Vec3::new(0.00,0.00,0.00),
         normal: Vec3::new(0.00,0.00,0.00),
@@ -201,5 +130,96 @@ fn ray_color(r: Ray, world: &dyn Hittable, depth: i32) -> Color {
 
 }
 
+
+fn random_scene()  -> HittableList {
+    let mut world = HittableList::new();
+
+    let ground_material = Material::Lambertian
+                                                (Lambertian{
+                                                    albedo: Color::new(0.5, 0.5, 0.5) });
+
+    world.add(Sphere{
+        center: Vec3::new(0.00, -1000.00, 0.00),
+        radius: 1000.00,
+        mat_ptr: ground_material
+    });
+
+
+    for a in -11..11{
+        for b in -11..11{
+            let choose_mat = random_f32(0.0, 1.0);
+            let center: Point3 = Point3::new(a as f32+0.9*random_f32(0.0,1.0),
+            0.2, b as f32+ 0.9*random_f32(0.0,1.0));
+
+            if (center - Point3::new(4.0,0.2,0.0)).length() > 0.9 {
+
+                if choose_mat < 0.8 {
+                    let albedo = Color::random(0.0, 1.0) * Color::random(0.0, 1.0);
+                    let sphere_material =
+                        Material::Lambertian(Lambertian{albedo});
+                    world.add(Sphere{
+                        center,
+                        radius: 0.2,
+                        mat_ptr: sphere_material,
+                    });
+                }
+
+                else if choose_mat < 0.95 {
+                    let albedo =  Color::random(0.5, 1.0);
+                    let fuzz = random_f32(0.00, 0.50);
+                    let sphere_material = Material::Metal
+                        (Metal{albedo, fuzz });
+                    world.add(Sphere{
+                        center,
+                        radius: 0.2,
+                        mat_ptr: sphere_material,
+                    });
+
+                }
+                else {
+                    let sphere_material =Material::
+                                                   Dielectric(Dielectric{index_of_refraction: 1.5}
+
+                    );
+                    world.add(Sphere{
+                        center,
+                        radius: 0.2,
+                        mat_ptr: sphere_material
+                    });
+                }
+            }
+
+        }
+
+    }
+    let material1 = Material::Dielectric(Dielectric{index_of_refraction: 1.5});
+    world.add(Sphere{
+        center: Vec3::new(0.00, 1.00, 0.00),
+        radius: 1.0,
+        mat_ptr: material1
+    });
+
+    let material2 = Material::Lambertian
+                                 (Lambertian{albedo: Color::new(0.4, 0.2, 0.1)})
+    ;
+
+
+    world.add(Sphere{
+        center: Vec3::new(-4.0, 1.0, 0.0),
+        radius: 1.0,
+        mat_ptr: material2
+    });
+
+    let material3 = Material::Metal(Metal{albedo: Color::new(0.7, 0.6, 0.5),
+        fuzz: 0.0}
+    );
+    world.add(Sphere{
+        center: Vec3::new(4.0, 1.0, 0.0),
+        radius: 1.0,
+        mat_ptr: material3
+    });
+
+    return world;
+}
 
 

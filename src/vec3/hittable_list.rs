@@ -2,13 +2,15 @@ use std::rc::Rc;
 use crate::hittable::*;
 use crate::vec3::ray::Ray;
 use crate::vec3::Vec3;
+use std::sync::Arc;
+use crate::vec3::sphere::Sphere;
 
 pub struct HittableList{
-   pub objects: Vec<Rc<dyn Hittable>>
+   pub objects: Vec<Sphere>
 }
 
 impl HittableList{
-    pub fn add(&mut self,object: Rc<dyn Hittable>) {
+    pub fn add(&mut self,object: Sphere) {
         self.objects.push(object)
     }
     pub fn clear(&mut self){
@@ -20,9 +22,8 @@ impl HittableList{
         }
     }
 }
-
-impl Hittable for HittableList{
-    fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: &mut HitRecord) -> bool{
+impl HittableList{
+    pub(crate) fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: &mut HitRecord) -> bool{
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
 

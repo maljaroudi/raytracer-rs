@@ -1,18 +1,18 @@
 use crate::vec3::*;
 use crate::vec3::ray::Ray;
 use std::rc::Rc;
-use crate::vec3::rtweekend::*;
 use crate::vec3::material::*;
+use std::sync::Arc;
 
 
-#[derive(Clone)]
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
-    pub mat_ptr: Option<Rc<dyn Material>>,
+    pub mat_ptr: Option<Material>,
     pub t: f32,
     pub front_face: bool
 }
+
 
 impl HitRecord{
     pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
@@ -29,7 +29,7 @@ impl HitRecord{
     }
 }
 
-pub trait Hittable {
-    fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: &mut HitRecord) -> bool;
+//pub trait Hittable {
+   // fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: &mut HitRecord) -> bool;
 
-}
+//}

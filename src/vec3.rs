@@ -200,5 +200,4 @@ impl ops::Mul for Vec3 {
 pub use Vec3 as Color;
 pub use Vec3 as Point3;
 use crate::vec3::rtweekend::random_f32;
-use std::ops::Neg;
 

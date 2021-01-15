@@ -1,27 +1,45 @@
 use crate::Color;
 use crate::rtweekend::clamp;
 
-pub fn write_color(pixel_color: Color, samples_per_pixel: i32){
-    let mut r = pixel_color.x();
-    let mut g = pixel_color.y();
-    let mut b = pixel_color.z();
+use std::fs::{File, OpenOptions};
+use std::io::{Write, Error, BufWriter,copy};
+use crate::vec3::Vec3;
+use rayon::iter::{ParallelIterator, IntoParallelIterator, IntoParallelRefIterator};
+use std::sync::Mutex;
+use rayon::iter::Map;
+use rayon::iter::*;
+use image::{ImageFormat, ImageOutputFormat, DynamicImage, ImageBuffer};
+
+pub fn write_color(img: Vec<Vec<Vec3>>, file: &str) -> Result<(), Error>{
+    let sizey = img.len() as u32;
+    let sizex = img[0].len() as u32;
+
+    let mut imgbuf = image::ImageBuffer::new(sizex, sizey);
+    let mut imgborrow = Mutex::new(imgbuf);
+    img.par_iter().enumerate().for_each(|(y,row)|{
+
+        row.par_iter().enumerate().for_each(|(x,pixel)|{
+            (imgborrow.lock().unwrap()).put_pixel(x as u32, y as u32, image::Rgb([pixel.x() as u8, pixel.y() as u8, pixel.z() as u8]));
 
 
-    let scale = 1.0 / samples_per_pixel as f32;
-    r = (scale * r).sqrt();
-    g = (scale * g).sqrt();
-    b = (scale * b).sqrt();
 
 
+        })
+    });
+    let mut fet = imgborrow.lock().unwrap().clone();
 
+    DynamicImage::ImageRgb8((fet)).save(file);
 
+     // for (y, row) in img.iter().enumerate() {
+     //     for (x, pixel) in row.iter().enumerate() {
+     //         imgbuf.put_pixel(x as u32, y as u32, image::Rgb([pixel.x() as u8, pixel.y() as u8, pixel.z() as u8]));
+     //     }};
 
-    println!("{} {} {}", 256.00 * clamp(r,0.0,0.999),
-             256.00 * clamp(g,0.0,0.999),
-             256.00 * clamp(b,0.0,0.999)
-    )
+    Ok(())
+
 
 
 
 }
+
 

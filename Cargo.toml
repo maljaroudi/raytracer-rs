@@ -6,5 +6,17 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+lto = 'thin'
+panic = 'abort'
+codegen-units = 1
+
+[profile.bench]
+lto = 'fat'
+codegen-units = 1
+
 [dependencies]
-rand = "0.8.1"
+rand = {version = "0.8.1", features = ["small_rng"]}
+rayon = "1.5.0"
+image = "0.23.12"
+parking_lot = "0.11.1"
