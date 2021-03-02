@@ -1,6 +1,6 @@
 # raytracer-rs
 Ray Tracer Implementation in Rust.
 
-Lesson at: https://raytracing.github.io/books/RayTracingInOneWeekend.html
+From RayTracing In One Weekend Book (C++): https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
 ![Sample](test.png)
